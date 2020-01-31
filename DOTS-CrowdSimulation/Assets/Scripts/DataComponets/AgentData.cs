@@ -11,27 +11,33 @@ public struct AgentData : IComponentData
     public Vector3 direction;
     public float speed;
 
-    private Vector3 steering;
+    public Vector3 steering;
 
-    public void addSteering(Vector3 pos, Vector3 dir)
+    public Vector3 addSteering(Vector3 pos, Vector3 dir)
     {
         Vector3 avoidance = CalcAgentAvoidanceForce(pos, dir);
 
-        steering += avoidance.normalized * speed;
+        this.steering += avoidance.normalized;
+        this.steering = steering.normalized;
+
+        Debug.Log($"Steer: {this.steering}");
+
+        return this.steering;
     }
     public void setSteering(Vector3 steer)
     {
-        steering = steer;
+        this.steering = steer;
     }
 
     public Vector3 getSteering()
     {
-        return steering;
+        //Debug.Log($"Steer2: {steering.normalized}");
+        return this.steering.normalized;
     }
 
     private Vector3 CalcAgentAvoidanceForce(Vector3 pos, Vector3 dir)
     {
-        Vector3 velocity = direction * speed;
+        Vector3 velocity = direction.normalized * speed;
         Vector3 tanForce = Vector3.zero;
         Vector3 distance = pos - position;
 

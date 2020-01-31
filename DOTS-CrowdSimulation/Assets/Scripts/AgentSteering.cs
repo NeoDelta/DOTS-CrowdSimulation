@@ -11,7 +11,7 @@ public class AgentSteering : JobComponentSystem
     {
         Entities.ForEach((ref AgentData agData) =>
         {
-            agData.direction = (agData.destination - agData.position).normalized;
+            //agData.direction = (agData.destination - agData.position).normalized;
         }).Run();
         return default;
     }

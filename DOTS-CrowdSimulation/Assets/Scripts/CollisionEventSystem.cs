@@ -6,6 +6,7 @@ using Unity.Jobs;
 using Unity.Burst;
 using Unity.Physics;
 using Unity.Physics.Systems;
+using Unity.Collections;
 
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class CollisionEventSystem : JobComponentSystem
@@ -25,6 +26,7 @@ public class CollisionEventSystem : JobComponentSystem
     struct CollisionEventSystemJob : ITriggerEventsJob
     {
         public ComponentDataFromEntity<AgentData> agentData;
+
         public void Execute(TriggerEvent triggerEvent)
         {
             var entityA = triggerEvent.Entities.EntityA;
@@ -34,8 +36,20 @@ public class CollisionEventSystem : JobComponentSystem
             {
                 Debug.Log($"collision event: {triggerEvent}. Entities: {entityA}, {entityB}");
 
-                agentData[entityA].addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
-                agentData[entityB].addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
+                // Vector3 stA = agentData[entityA].addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
+                // Vector3 stB = agentData[entityB].addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
+
+                AgentData adA = agentData[entityA];
+                adA.addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
+                agentData[entityA] = adA;
+
+                AgentData adB = agentData[entityB];
+                adB.addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
+                agentData[entityB] = adB;
+
+                /*Debug.Log($"StA: {stA}");
+                agentData[entityA].steering = new Vector3(stA.x, stA.y, stA.z);*/
+                Debug.Log($"Steer2: {agentData[entityA].steering}");
             }  
             
         }
@@ -50,6 +64,7 @@ public class CollisionEventSystem : JobComponentSystem
             agentData = GetComponentDataFromEntity<AgentData>()
         }.Schedule( stepPhysicsWorld.Simulation, ref buildPhysicsWorldSystem.PhysicsWorld,
              inputDependencies);
+
         return job;
     }
 }

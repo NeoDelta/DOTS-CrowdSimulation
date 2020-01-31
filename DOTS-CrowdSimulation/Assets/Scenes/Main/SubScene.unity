@@ -463,9 +463,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a1b72b4900b6754fae9211a9ffc0e32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 0, y: 1, z: 1}
-  destination: {x: -18, y: 0, z: 0}
-  direction: {x: -1, y: 0, z: 0}
+  position: {x: 0, y: 1, z: 0}
+  destination: {x: -15, y: 1, z: 0}
+  direction: {x: 0, y: 0, z: 0}
   speed: 1
 --- !u!195 &1907243457
 NavMeshAgent:
@@ -558,7 +558,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1907243454}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1248268237}
@@ -752,7 +752,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2141824764}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -18, y: 1, z: 0}
+  m_LocalPosition: {x: -18, y: 1, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1979403459}
@@ -794,7 +794,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a1b72b4900b6754fae9211a9ffc0e32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: -18, y: 1, z: 0}
-  destination: {x: 18, y: 0, z: 0}
-  direction: {x: 1, y: 0, z: 0}
-  speed: 1
+  position: {x: -18, y: 1, z: -1}
+  destination: {x: 18, y: 1, z: 0}
+  direction: {x: 0, y: 0, z: 0}
+  speed: 2

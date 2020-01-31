@@ -6,26 +6,27 @@ using Unity.Jobs;
 using Unity.Transforms;
 
 [AlwaysSynchronizeSystem]
-[UpdateAfter(typeof(AgentSteering))]
 [UpdateAfter(typeof(CollisionEventSystem))]
 public class AgentMovement : JobComponentSystem
 {
-    protected override void OnCreate()
+    /*protected override void OnCreate()
     {
         Entities.ForEach((ref AgentData agData) =>
         {
             agData.setSteering(Vector3.zero);
         }).Run();
-    }
+    }*/
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         float dt = Time.DeltaTime;
 
-        Entities.ForEach((ref Translation trans , ref AgentData inData) =>
+        /*JobHandle job =*/ Entities.ForEach((ref Translation trans , ref AgentData inData) =>
         {
-            Vector3 velocity = (inData.direction.normalized * 0.1f + inData.getSteering().normalized * 0.9f).normalized * inData.speed * dt;
+            Vector3 attractor = (inData.destination - inData.position).normalized * inData.speed;
+            Vector3 velocity = (inData.direction * inData.speed + attractor * 0.5f + inData.getSteering() * inData.speed *  0.5f).normalized * inData.speed * dt;
 
+            inData.direction = velocity.normalized;
             inData.position += velocity;
 
             trans.Value.x = trans.Value.x + velocity.x;
@@ -33,7 +34,7 @@ public class AgentMovement : JobComponentSystem
             trans.Value.z = trans.Value.z + velocity.z;
 
             inData.setSteering(Vector3.zero);
-        }).Run();
+        }).Run();/*.Schedule(inputDeps);*/
 
         return default;
     }
