@@ -11,7 +11,7 @@ using Unity.Collections;
 [UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class CollisionEventSystem : JobComponentSystem
 {
-
+    //[BurstCompile]
 
     BuildPhysicsWorld buildPhysicsWorldSystem;
     StepPhysicsWorld stepPhysicsWorld;
@@ -26,7 +26,7 @@ public class CollisionEventSystem : JobComponentSystem
     struct CollisionEventSystemJob : ITriggerEventsJob
     {
         public ComponentDataFromEntity<AgentData> agentData;
-
+        
         public void Execute(TriggerEvent triggerEvent)
         {
             var entityA = triggerEvent.Entities.EntityA;
@@ -34,7 +34,7 @@ public class CollisionEventSystem : JobComponentSystem
 
             if (agentData.Exists(entityA) && agentData.Exists(entityB))
             {
-                Debug.Log($"collision event: {triggerEvent}. Entities: {entityA}, {entityB}");
+                //Debug.Log($"collision event: {triggerEvent}. Entities: {entityA}, {entityB}");
 
                 // Vector3 stA = agentData[entityA].addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
                 // Vector3 stB = agentData[entityB].addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
@@ -49,7 +49,7 @@ public class CollisionEventSystem : JobComponentSystem
 
                 /*Debug.Log($"StA: {stA}");
                 agentData[entityA].steering = new Vector3(stA.x, stA.y, stA.z);*/
-                Debug.Log($"Steer2: {agentData[entityA].steering}");
+                //Debug.Log($"Steer2: {agentData[entityA].steering}");
             }  
             
         }
@@ -62,8 +62,7 @@ public class CollisionEventSystem : JobComponentSystem
         var job = new CollisionEventSystemJob()
         {
             agentData = GetComponentDataFromEntity<AgentData>()
-        }.Schedule( stepPhysicsWorld.Simulation, ref buildPhysicsWorldSystem.PhysicsWorld,
-             inputDependencies);
+        }.Schedule( stepPhysicsWorld.Simulation, ref buildPhysicsWorldSystem.PhysicsWorld, inputDependencies);
 
         return job;
     }
