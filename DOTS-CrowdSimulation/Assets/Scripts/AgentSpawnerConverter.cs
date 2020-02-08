@@ -8,6 +8,8 @@ public class AgentSpawnerConverter : MonoBehaviour, IConvertGameObjectToEntity, 
 {
     public int rows;
     public int columns;
+    public float minSpeed;
+    public float maxSpeed;
     public GameObject AgentPrefab;
 
     public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
@@ -23,6 +25,8 @@ public class AgentSpawnerConverter : MonoBehaviour, IConvertGameObjectToEntity, 
         {
             rows = this.rows,
             columns = this.columns,
+            minSpeed = this.minSpeed,
+            maxSpeed = this.maxSpeed,
             AgentPrefabEntity = agentPrefabEntity
         };
 

@@ -8,23 +8,42 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Collections;
 
-[UpdateAfter(typeof(EndFramePhysicsSystem))]
+public struct TriggerStayRef : IBufferElementData
+{
+    public Vector3 pos;
+    public Vector3 vel;
+}
+
+[UpdateAfter(typeof(StepPhysicsWorld)), UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class CollisionEventSystem : JobComponentSystem
 {
-    //[BurstCompile]
+    [BurstCompile, RequireComponentTag(typeof(TriggerStayRef))]
+    private struct ClearTriggers : IJobForEachWithEntity<PhysicsVelocity>
+    {
+        [NativeDisableParallelForRestriction] public BufferFromEntity<TriggerStayRef> TriggerStayRefsFromEntity;
 
-    BuildPhysicsWorld buildPhysicsWorldSystem;
-    StepPhysicsWorld stepPhysicsWorld;
+        public void Execute(Entity entity, int index, [ReadOnly] ref PhysicsVelocity velocity)
+        {
+            TriggerStayRefsFromEntity[entity].Clear();
+        }
+    }
+
+    private BuildPhysicsWorld buildPhysicsWorldSystem;
+    private StepPhysicsWorld stepPhysicsWorld;
+    private EndFramePhysicsSystem endFramePhysicsSystem;
+    private EntityQuery group;
 
     protected override void OnCreate()
     {
         buildPhysicsWorldSystem = World.GetOrCreateSystem<BuildPhysicsWorld>();
         stepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
+        endFramePhysicsSystem = World.GetOrCreateSystem<EndFramePhysicsSystem>();
     }
 
     //[BurstCompile]
     struct CollisionEventSystemJob : ITriggerEventsJob
     {
+        [NativeDisableParallelForRestriction] public BufferFromEntity<TriggerStayRef> TriggerStayRefsFromEntity;
         public ComponentDataFromEntity<AgentData> agentData;
         
         public void Execute(TriggerEvent triggerEvent)
@@ -36,20 +55,27 @@ public class CollisionEventSystem : JobComponentSystem
             {
                 //Debug.Log($"collision event: {triggerEvent}. Entities: {entityA}, {entityB}");
 
-                // Vector3 stA = agentData[entityA].addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
+                //Vector3 stA = agentData[entityA].addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
                 // Vector3 stB = agentData[entityB].addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
 
                 AgentData adA = agentData[entityA];
-                adA.addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
-                agentData[entityA] = adA;
+                /*adA.addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
+                agentData[entityA] = adA;*/
 
                 AgentData adB = agentData[entityB];
-                adB.addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
+                /*adB.addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
                 agentData[entityB] = adB;
 
                 /*Debug.Log($"StA: {stA}");
                 agentData[entityA].steering = new Vector3(stA.x, stA.y, stA.z);*/
                 //Debug.Log($"Steer2: {agentData[entityA].steering}");
+
+                if(TriggerStayRefsFromEntity.Exists(entityA))
+                    TriggerStayRefsFromEntity[entityA].Add(new TriggerStayRef { pos = adB.position, vel = adB.direction * adB.speed});
+                //if (TriggerStayRefsFromEntity.Exists(entityB))
+                    //TriggerStayRefsFromEntity[entityB].Add(new TriggerStayRef { pos = adA.position, vel = adA.direction * adA.speed });
+
+
             }  
             
         }
@@ -59,11 +85,25 @@ public class CollisionEventSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
     {
-        var job = new CollisionEventSystemJob()
+        var triggerStayRefsFromEntity = GetBufferFromEntity<TriggerStayRef>();
+        
+        var job1 = new ClearTriggers 
+        { 
+            TriggerStayRefsFromEntity = triggerStayRefsFromEntity 
+        }.Schedule(this, inputDependencies);
+
+        inputDependencies = JobHandle.CombineDependencies(inputDependencies, job1, stepPhysicsWorld.FinalSimulationJobHandle);
+
+        var job2 = new CollisionEventSystemJob()
         {
+            TriggerStayRefsFromEntity = triggerStayRefsFromEntity,
             agentData = GetComponentDataFromEntity<AgentData>()
         }.Schedule( stepPhysicsWorld.Simulation, ref buildPhysicsWorldSystem.PhysicsWorld, inputDependencies);
 
-        return job;
+        inputDependencies = JobHandle.CombineDependencies(inputDependencies, job2);
+
+        endFramePhysicsSystem.HandlesToWaitFor.Add(inputDependencies);
+
+        return inputDependencies;
     }
 }

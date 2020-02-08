@@ -28,8 +28,9 @@ public class AgentSpawnerSystem : ComponentSystem
                         position = new Vector3(posX, 1.0f, posZ),
                         destination = new Vector3(UnityEngine.Random.Range(-50.0f, 50.0f), 1.0f, UnityEngine.Random.Range(-50.0f, 50.0f)),
                         direction = new Vector3(0.0f, 0.0f, 0.0f),
-                        speed = UnityEngine.Random.Range(1.0f, 3.0f)
+                        speed = UnityEngine.Random.Range(agentSpawner.minSpeed, agentSpawner.maxSpeed)
                     });
+                    EntityManager.AddBuffer<TriggerStayRef>(agentEntity);
                 }
             }
 
