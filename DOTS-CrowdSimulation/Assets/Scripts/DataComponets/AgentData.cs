@@ -27,7 +27,6 @@ public struct AgentData : IComponentData
 
     public Vector3 getSteering()
     {
-        //Debug.Log($"Steer2: {steering.normalized}");
         return this.steering.normalized;
     }
 
@@ -50,7 +49,7 @@ public struct AgentData : IComponentData
 
             Vector3 rightForce = new Vector3(velocity.z, velocity.y, -velocity.x);
             tanForce += rightForce * 0.2f;
-            //tanForce = tanForce.normalized;
+            tanForce = tanForce.normalized;
 
         }
 

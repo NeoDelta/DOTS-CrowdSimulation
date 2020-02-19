@@ -19,7 +19,7 @@ public class AgentMovement : JobComponentSystem
         var randomArray = World.GetExistingSystem<RandomSystem>().RandomArray;
         var lookup = GetBufferFromEntity<TriggerStayRef>();
 
-        JobHandle job1 = Entities.WithNativeDisableParallelForRestriction(lookup).ForEach((Entity entity, ref AgentData agentData) =>
+        JobHandle job1 = Entities.WithNativeDisableParallelForRestriction(lookup).ForEach(( Entity entity, ref AgentData agentData) =>
         {     
             var buffer = lookup[entity];
 
@@ -39,7 +39,7 @@ public class AgentMovement : JobComponentSystem
         {
             
             Vector3 attractor = (inData.destination - inData.position).normalized * inData.speed;
-            Vector3 velocity = (inData.direction * inData.speed + attractor * 0.4f + inData.getSteering() * inData.speed *  0.6f).normalized * inData.speed * dt;
+            Vector3 velocity = (inData.direction * inData.speed + attractor * 0.5f + inData.getSteering() * inData.speed *  0.5f).normalized * inData.speed * dt;
 
             inData.direction = velocity.normalized;
 
@@ -63,7 +63,7 @@ public class AgentMovement : JobComponentSystem
             {
                 var random = randomArray[nativeThreadIndex];
 
-                inData.destination = new Vector3(random.NextFloat(-50.0f, 50.0f), 1.0f, random.NextFloat(-50.0f, 50.0f));
+                inData.destination = new Vector3(random.NextFloat(-400.0f, 400.0f), 1.0f, random.NextFloat(-400.0f, 400.0f));
             }
 
         }).Schedule(inputDeps);

@@ -40,7 +40,7 @@ public class CollisionEventSystem : JobComponentSystem
         endFramePhysicsSystem = World.GetOrCreateSystem<EndFramePhysicsSystem>();
     }
 
-    //[BurstCompile]
+    [BurstCompile]
     struct CollisionEventSystemJob : ITriggerEventsJob
     {
         [NativeDisableParallelForRestriction] public BufferFromEntity<TriggerStayRef> TriggerStayRefsFromEntity;
@@ -53,22 +53,8 @@ public class CollisionEventSystem : JobComponentSystem
 
             if (agentData.Exists(entityA) && agentData.Exists(entityB))
             {
-                //Debug.Log($"collision event: {triggerEvent}. Entities: {entityA}, {entityB}");
-
-                //Vector3 stA = agentData[entityA].addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
-                // Vector3 stB = agentData[entityB].addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
-
                 AgentData adA = agentData[entityA];
-                /*adA.addSteering(agentData[entityB].position, agentData[entityB].direction * agentData[entityB].speed);
-                agentData[entityA] = adA;*/
-
                 AgentData adB = agentData[entityB];
-                /*adB.addSteering(agentData[entityA].position, agentData[entityA].direction * agentData[entityA].speed);
-                agentData[entityB] = adB;
-
-                /*Debug.Log($"StA: {stA}");
-                agentData[entityA].steering = new Vector3(stA.x, stA.y, stA.z);*/
-                //Debug.Log($"Steer2: {agentData[entityA].steering}");
 
                 if(TriggerStayRefsFromEntity.Exists(entityA))
                     TriggerStayRefsFromEntity[entityA].Add(new TriggerStayRef { pos = adB.position, vel = adB.direction * adB.speed});
@@ -83,6 +69,7 @@ public class CollisionEventSystem : JobComponentSystem
 
     }
 
+    [BurstCompile]
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
     {
         var triggerStayRefsFromEntity = GetBufferFromEntity<TriggerStayRef>();
