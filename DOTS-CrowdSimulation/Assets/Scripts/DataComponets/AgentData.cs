@@ -9,25 +9,26 @@ public struct AgentData : IComponentData
     public Vector3 position;
     public Vector3 destination;
     public Vector3 direction;
+    public float maxSpeed;
     public float speed;
+    public float acceleration;
 
-    private Vector3 steering;
+    private Vector3 avoidanceForces;
 
-    public void addSteering(Vector3 pos, Vector3 dir)
+    public void addAvoidanceForce(Vector3 pos, Vector3 dir)
     {
         Vector3 avoidance = CalculateAgentAvoidanceForce(pos, dir);
 
-        this.steering += avoidance.normalized;
-        this.steering = steering.normalized;
+        this.avoidanceForces += avoidance.normalized;
     }
-    public void setSteering(Vector3 steer)
+    public void setAvoidanceForces(Vector3 steer)
     {
-        this.steering = steer;
+        this.avoidanceForces = steer;
     }
 
-    public Vector3 getSteering()
+    public Vector3 getAvoidanceForces()
     {
-        return this.steering.normalized;
+        return this.avoidanceForces;
     }
 
     private Vector3 CalculateAgentAvoidanceForce(Vector3 pos, Vector3 dir)
@@ -54,7 +55,7 @@ public struct AgentData : IComponentData
         }
 
         //tanForce *= Mathf.Pow(distance.sqrMagnitude - this.transform.Find("InfluenceBox").GetComponent<BoxCollider>().size.z, 2.0f);
-        tanForce *= Mathf.Pow(distance.sqrMagnitude - 5.0f, 2.0f);
+        tanForce *= Mathf.Pow(distance.magnitude - 5.0f, 2.0f);
 
         if (Vector3.Dot(velocity, dir) > 0)
             tanForce *= 1.2f;

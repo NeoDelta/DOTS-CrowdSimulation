@@ -27,7 +27,7 @@ public class AgentMovement : JobComponentSystem
             {
                 var p = buffer[i].pos;
                 var v = buffer[i].vel;
-                agentData.addSteering(p, v);
+                agentData.addAvoidanceForce(p, v);
             }
 
         }).Schedule(inputDeps);
@@ -38,14 +38,22 @@ public class AgentMovement : JobComponentSystem
             .ForEach((int nativeThreadIndex, ref Rotation rot, ref Translation trans , ref AgentData inData, ref PhysicsVelocity physicsVelocity, ref PhysicsMass physicsMass) =>
         {
             
-            Vector3 attractor = (inData.destination - inData.position).normalized * inData.speed;
-            Vector3 velocity = (inData.direction * inData.speed + attractor * 0.5f + inData.getSteering() * inData.speed *  0.5f).normalized * inData.speed * dt;
+            Vector3 attractor = (inData.destination - inData.position).normalized * inData.maxSpeed;
+            //Vector3 velocity = (inData.direction * inData.speed + attractor * 0.4f + inData.getSteering() * inData.speed *  0.6f).normalized * inData.speed * dt;
+            Vector3 steering = inData.direction + attractor.normalized * 0.4f + inData.getAvoidanceForces().normalized * 0.6f;
+            steering = (steering * inData.maxSpeed).normalized;
+
+            float newSpeed = inData.speed + inData.acceleration * dt;
+            if (newSpeed >= inData.maxSpeed) newSpeed = inData.maxSpeed;
+
+            Vector3 velocity = newSpeed * steering;
 
             inData.direction = velocity.normalized;
+            inData.speed = velocity.magnitude;
 
-            trans.Value.x = trans.Value.x + velocity.x;
+            trans.Value.x = trans.Value.x + velocity.x * dt;
             trans.Value.y = 1.0f;
-            trans.Value.z = trans.Value.z + velocity.z;
+            trans.Value.z = trans.Value.z + velocity.z * dt;
 
             rot.Value = Quaternion.LookRotation(inData.direction);
 
@@ -57,9 +65,11 @@ public class AgentMovement : JobComponentSystem
 
             inData.position = trans.Value;
 
-            inData.setSteering(Vector3.zero);
+            //Reset avoidance forces for next iteration.
+            inData.setAvoidanceForces(Vector3.zero);
 
-            if ((inData.destination - inData.position).sqrMagnitude < 1.0f)
+            //Set new destination if the agent is near the current destination.
+            if ((inData.destination - inData.position).magnitude < 1.0f)
             {
                 var random = randomArray[nativeThreadIndex];
 
