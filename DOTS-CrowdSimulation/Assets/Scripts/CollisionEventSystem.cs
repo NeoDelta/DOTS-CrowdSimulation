@@ -7,6 +7,8 @@ using Unity.Burst;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Collections;
+using Unity.Transforms;
+using Unity.Mathematics;
 
 public struct TriggerStayRef : IBufferElementData
 {
@@ -40,16 +42,19 @@ public class CollisionEventSystem : JobComponentSystem
         endFramePhysicsSystem = World.GetOrCreateSystem<EndFramePhysicsSystem>();
     }
 
+
     [BurstCompile]
     struct CollisionEventSystemJob : ITriggerEventsJob
     {
         [NativeDisableParallelForRestriction] public BufferFromEntity<TriggerStayRef> TriggerStayRefsFromEntity;
         public ComponentDataFromEntity<AgentData> agentData;
-        
+        public ComponentDataFromEntity<Translation> translationData;
+
         public void Execute(TriggerEvent triggerEvent)
         {
             var entityA = triggerEvent.Entities.EntityA;
             var entityB = triggerEvent.Entities.EntityB;
+
 
             if (agentData.Exists(entityA) && agentData.Exists(entityB))
             {
@@ -64,9 +69,15 @@ public class CollisionEventSystem : JobComponentSystem
 
             }  
             
+            if (agentData.Exists(entityA) && !agentData.Exists(entityB) && translationData.Exists(entityB))
+            {
+                AgentData adA = agentData[entityA];
+                Translation trB = translationData[entityB];
+
+                float3 origin = adA.position;
+                float3 offset = trB.Value - origin;
+            }
         }
-
-
     }
 
     [BurstCompile]
@@ -84,7 +95,8 @@ public class CollisionEventSystem : JobComponentSystem
         var job2 = new CollisionEventSystemJob()
         {
             TriggerStayRefsFromEntity = triggerStayRefsFromEntity,
-            agentData = GetComponentDataFromEntity<AgentData>()
+            agentData = GetComponentDataFromEntity<AgentData>(),
+            translationData = GetComponentDataFromEntity<Translation>()
         }.Schedule( stepPhysicsWorld.Simulation, ref buildPhysicsWorldSystem.PhysicsWorld, inputDependencies);
 
         inputDependencies = JobHandle.CombineDependencies(inputDependencies, job2);

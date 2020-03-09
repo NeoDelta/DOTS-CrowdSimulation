@@ -31,10 +31,20 @@ public struct AgentData : IComponentData
         return this.avoidanceForces;
     }
 
+    private Vector3 CalcWallAvoidanceForce(Vector3 normal)
+    {
+        Vector3 tanForce;
+
+        tanForce = Vector3.Cross(normal, direction.normalized * speed);
+        tanForce = Vector3.Cross(tanForce, normal).normalized;
+
+        return tanForce;
+    }
+
     private Vector3 CalculateAgentAvoidanceForce(Vector3 pos, Vector3 dir)
     {
-        Vector3 velocity = direction.normalized * speed;
-        Vector3 tanForce = Vector3.zero;
+        Vector3 tanForce;
+        Vector3 velocity = direction.normalized * speed; 
         Vector3 distance = pos - position;
 
         tanForce = Vector3.Cross(distance, velocity);

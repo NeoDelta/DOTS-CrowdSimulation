@@ -19,6 +19,7 @@ public class AgentMovement : JobComponentSystem
         var randomArray = World.GetExistingSystem<RandomSystem>().RandomArray;
         var lookup = GetBufferFromEntity<TriggerStayRef>();
 
+        //Calculate avoidance forces
         JobHandle job1 = Entities.WithNativeDisableParallelForRestriction(lookup).ForEach(( Entity entity, ref AgentData agentData) =>
         {     
             var buffer = lookup[entity];
@@ -34,13 +35,15 @@ public class AgentMovement : JobComponentSystem
 
         inputDeps = JobHandle.CombineDependencies(inputDeps, job1);
 
+        //Apply forces and calculate new velocity
         JobHandle job = Entities.WithNativeDisableParallelForRestriction(randomArray)
             .ForEach((int nativeThreadIndex, ref Rotation rot, ref Translation trans , ref AgentData inData, ref PhysicsVelocity physicsVelocity, ref PhysicsMass physicsMass) =>
         {
             
             Vector3 attractor = (inData.destination - inData.position).normalized * inData.maxSpeed;
             //Vector3 velocity = (inData.direction * inData.speed + attractor * 0.4f + inData.getSteering() * inData.speed *  0.6f).normalized * inData.speed * dt;
-            Vector3 steering = inData.direction + attractor.normalized * 0.4f + inData.getAvoidanceForces().normalized * 0.6f;
+            Vector3 currentVelocity = new Vector3(physicsVelocity.Linear.x, 0.0f, physicsVelocity.Linear.z);
+            Vector3 steering = currentVelocity + attractor.normalized * 0.6f + inData.getAvoidanceForces().normalized * 0.4f;
             steering = (steering * inData.maxSpeed).normalized;
 
             float newSpeed = inData.speed + inData.acceleration * dt;
