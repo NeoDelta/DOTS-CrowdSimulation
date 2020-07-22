@@ -23,6 +23,7 @@ public class AgentSpawnerConverter : MonoBehaviour, IConvertGameObjectToEntity, 
 
         var agentSpawnerData = new AgentSpawnerData
         {
+            offset = this.transform.position,
             rows = this.rows,
             columns = this.columns,
             minSpeed = this.minSpeed,

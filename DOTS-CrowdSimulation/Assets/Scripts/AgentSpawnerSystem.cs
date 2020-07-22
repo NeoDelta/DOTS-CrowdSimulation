@@ -15,11 +15,11 @@ public class AgentSpawnerSystem : ComponentSystem
         {
             for (int x = 0; x < agentSpawner.rows; x++)
             {
-                float posX = 8.0f*x - 4.0f*agentSpawner.rows;
+                float posX = 2.0f*x - 2.0f*agentSpawner.rows + agentSpawner.offset.x;
 
                 for (int z = 0; z < agentSpawner.columns; z++)
                 {
-                    float posZ = 8.0f*z - 4.0f*agentSpawner.columns;
+                    float posZ = 2.0f*z - 2.0f*agentSpawner.columns + agentSpawner.offset.z;
 
                     var agentEntity = EntityManager.Instantiate(agentSpawner.AgentPrefabEntity);
 
@@ -30,12 +30,17 @@ public class AgentSpawnerSystem : ComponentSystem
                         direction = new Vector3(0.0f, 0.0f, 0.0f),
                         maxSpeed = UnityEngine.Random.Range(agentSpawner.minSpeed, agentSpawner.maxSpeed),
                         speed = 0.0f,
-                        acceleration = 50.0f
+                        acceleration = 50.0f,
+                        hasPath = false,
+                        navMeshNodeIndex = -1,
+                        pathIndex = 0
                     });
                     EntityManager.AddBuffer<TriggerStayRef>(agentEntity);
+                    EntityManager.AddBuffer<PathBuffer>(agentEntity);
                 }
             }
 
+            //Dispose of it since where are not going to use it any longer
             EntityManager.DestroyEntity(entity);
 
         });

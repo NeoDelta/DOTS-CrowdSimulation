@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class AgentSpawnerData : IComponentData
 {
+    public Vector3 offset;
     public int rows;
     public int columns;
     public float minSpeed;

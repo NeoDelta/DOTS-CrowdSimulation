@@ -178,8 +178,12 @@ MonoBehaviour:
   position: {x: 0, y: 0, z: 0}
   destination: {x: 0, y: 0, z: 0}
   direction: {x: 0, y: 0, z: 0}
+  maxSpeed: 0
   speed: 1
   acceleration: 10
+  hasPath: 0
+  navMeshNodeIndex: 0
+  pathIndex: 0
 --- !u!114 &3770435285715497076
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,8 +208,8 @@ MonoBehaviour:
   m_PrimitiveOrientation:
     Value:
       x: 90
-      y: 90
-      z: 0
+      y: 0
+      z: -90
     RotationOrder: 4
   m_Capsule:
     Height: 2
