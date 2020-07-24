@@ -21,9 +21,10 @@ public struct AgentData : IComponentData
 
     // Sum of all the current avoidance forces to apply
     private Vector3 avoidanceForces;
+
+    // -------Every variable below here should be set to be private later on-------
     // Indicates wheter the agent has a designated path or not
     public bool hasPath;
-
     public int navMeshNodeIndex;
     public int pathIndex;
 
@@ -109,6 +110,12 @@ public struct AgentData : IComponentData
         return tanForce;
     }
 
+    /// <summary>
+    /// Calculates the projection of the agent position to the destination portal (represented as it's to end points).
+    /// </summary>
+    /// <param name="v1"> End point 1 of the portal.</param>
+    /// <param name="v2"> End point 2 of the portal.</param>
+    /// <returns></returns>
     public Vector3 getProyectedWayPoint(Vector3 v1, Vector3 v2)
     {
         float x = position.x;

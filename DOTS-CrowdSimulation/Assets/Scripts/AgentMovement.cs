@@ -8,6 +8,10 @@ using Unity.Burst;
 using Unity.Physics;
 
 //[AlwaysSynchronizeSystem]
+/// <summary>
+/// Responsible to handle the agents movement based on it's <see cref="AgentData"/>.
+/// Should be call only after all physics collision are done.
+/// </summary>
 [UpdateAfter(typeof(CollisionEventSystem))]
 public class AgentMovement : JobComponentSystem
 {
@@ -66,10 +70,12 @@ public class AgentMovement : JobComponentSystem
                 rot.Value = Quaternion.LookRotation(inData.direction);
                 //rot.Value = Quaternion.Lerp(Quaternion.LookRotation(inData.direction), rot.Value, 2f*dt);
 
+                // Update physics velocity
                 physicsVelocity.Linear.x = velocity.x;
-                physicsVelocity.Linear.y = 0.0f;
+                physicsVelocity.Linear.y = 0.0f; // Right now agent cans only move along one plane, should be change when adding nav meshes with different heights
                 physicsVelocity.Linear.z = velocity.z;
 
+                //Ensure center of mass stays centered, otherwise the agent may topple over itself
                 physicsMass.InverseInertia[0] = 0f;
                 physicsMass.InverseInertia[2] = 0f;
 

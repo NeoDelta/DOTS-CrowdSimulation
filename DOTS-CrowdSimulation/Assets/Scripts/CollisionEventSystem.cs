@@ -10,6 +10,10 @@ using Unity.Collections;
 using Unity.Transforms;
 using Unity.Mathematics;
 
+/// <summary>
+/// Agents influence buffer, used to calculates avoidance forces in <see cref="AgentMovement"></see>.
+/// Contains the position and velocity vector of every agent inside it's influence box.
+/// </summary>
 public struct TriggerStayRef : IBufferElementData
 {
     public Vector3 pos;
@@ -19,8 +23,11 @@ public struct TriggerStayRef : IBufferElementData
 [UpdateAfter(typeof(StepPhysicsWorld)), UpdateAfter(typeof(EndFramePhysicsSystem))]
 public class CollisionEventSystem : JobComponentSystem
 {
+    /// <summary>
+    /// Resets the agents influence buffer <see cref="TriggerStayRef"/>
+    /// </summary>
     [BurstCompile, RequireComponentTag(typeof(TriggerStayRef))]
-    private struct ClearTriggers : IJobForEachWithEntity<PhysicsVelocity>
+    private struct ClearTriggers : IJobForEachWithEntity<PhysicsVelocity> //Deprecated should be change to Entities.Foreach in OnUpdate
     {
         [NativeDisableParallelForRestriction] public BufferFromEntity<TriggerStayRef> TriggerStayRefsFromEntity;
 
@@ -42,7 +49,9 @@ public class CollisionEventSystem : JobComponentSystem
         endFramePhysicsSystem = World.GetOrCreateSystem<EndFramePhysicsSystem>();
     }
 
-
+    /// <summary>
+    /// Detects if an agent has fall inside the influence box of another one and stores it's information in the apropiate influence buffer.
+    /// </summary>
     [BurstCompile]
     struct CollisionEventSystemJob : ITriggerEventsJob
     {
@@ -69,6 +78,7 @@ public class CollisionEventSystem : JobComponentSystem
 
             }  
             
+            //Planned to be used for wall/obstacle detection (WIP)
             if (agentData.Exists(entityA) && !agentData.Exists(entityB) && translationData.Exists(entityB))
             {
                 AgentData adA = agentData[entityA];
